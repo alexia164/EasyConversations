@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -12,16 +13,15 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.speech.RecognizerIntent;
@@ -46,11 +46,16 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
 
     private static final String MESSAGE_TYPE_RESPONSE = "RESPONSE";
     private static final String MESSAGE_TYPE_REQUEST = "REQUEST";
-    private String languageTranslated = "English"; // Variable to hold the selected language
-    private String regionTranslated = "en-US"; // American english, for example
-    private String languageToTranslate = "es"; // Variable to hold the selected language
-    private String regionToTranslate = "ES"; // Variable to hold the selected language
-    private String longLanguageToTranslate = "Spanish";
+    private String longLanguage1 = "English";
+    private String languageRegion1 = "en-US";
+    private String language1 = "en";
+    private String region1 = "US";
+    private String longLanguage2 = "Spanish";
+    private String languageRegion2 = "es-ES";
+    private String language2 = "es";
+    private String region2 = "ES";
+    private boolean isLeftSpeaking = true; // Initial alignment
+    private boolean translateToRightLanguage = true;
 
 
     private ActivityResultLauncher<Intent> voiceRecognitionLauncher = registerForActivityResult(
@@ -64,10 +69,13 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
             }
     );
 
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getSupportActionBar().setTitle("GPT Translator");
 
         languageSpinner = findViewById(R.id.languageSpinner);
 
@@ -92,127 +100,241 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // Get the selected language
-                languageTranslated = languages[position];
+                longLanguage1 = languages[position];
 
-                if (languageTranslated.equals("Afrikaans")) {
-                    regionTranslated = "af-ZA";
-                } else if (languageTranslated.equals("Arabic")) {
-                    regionTranslated = "ar-SA";
-                } else if (languageTranslated.equals("Armenian")) {
-                    regionTranslated = "hy-AM";
-                } else if (languageTranslated.equals("Azerbaijani")) {
-                    regionTranslated = "az-AZ";
-                } else if (languageTranslated.equals("Belarusian")) {
-                    regionTranslated = "be-BY";
-                } else if (languageTranslated.equals("Bosnian")) {
-                    regionTranslated = "bs-BA";
-                } else if (languageTranslated.equals("Bulgarian")) {
-                    regionTranslated = "bg-BG";
-                } else if (languageTranslated.equals("Catalan")) {
-                    regionTranslated = "ca-ES";
-                } else if (languageTranslated.equals("Chinese")) {
-                    regionTranslated = "zh-CN";
-                } else if (languageTranslated.equals("Croatian")) {
-                    regionTranslated = "hr-HR";
-                } else if (languageTranslated.equals("Czech")) {
-                    regionTranslated = "cs-CZ";
-                } else if (languageTranslated.equals("Danish")) {
-                    regionTranslated = "da-DK";
-                } else if (languageTranslated.equals("Dutch")) {
-                    regionTranslated = "nl-NL";
-                } else if (languageTranslated.equals("English")) {
-                    regionTranslated = "en-US";
-                } else if (languageTranslated.equals("Estonian")) {
-                    regionTranslated = "et-EE";
-                } else if (languageTranslated.equals("Finnish")) {
-                    regionTranslated = "fi-FI";
-                } else if (languageTranslated.equals("French")) {
-                    regionTranslated = "fr-FR";
-                } else if (languageTranslated.equals("Galician")) {
-                    regionTranslated = "gl-ES";
-                } else if (languageTranslated.equals("German")) {
-                    regionTranslated = "de-DE";
-                } else if (languageTranslated.equals("Greek")) {
-                    regionTranslated = "el-GR";
-                } else if (languageTranslated.equals("Hebrew")) {
-                    regionTranslated = "he-IL";
-                } else if (languageTranslated.equals("Hindi")) {
-                    regionTranslated = "hi-IN";
-                } else if (languageTranslated.equals("Hungarian")) {
-                    regionTranslated = "hu-HU";
-                } else if (languageTranslated.equals("Icelandic")) {
-                    regionTranslated = "is-IS";
-                } else if (languageTranslated.equals("Indonesian")) {
-                    regionTranslated = "id-ID";
-                } else if (languageTranslated.equals("Italian")) {
-                    regionTranslated = "it-IT";
-                } else if (languageTranslated.equals("Japanese")) {
-                    regionTranslated = "ja-JP";
-                } else if (languageTranslated.equals("Kannada")) {
-                    regionTranslated = "kn-IN";
-                } else if (languageTranslated.equals("Kazakh")) {
-                    regionTranslated = "kk-KZ";
-                } else if (languageTranslated.equals("Korean")) {
-                    regionTranslated = "ko-KR";
-                } else if (languageTranslated.equals("Latvian")) {
-                    regionTranslated = "lv-LV";
-                } else if (languageTranslated.equals("Lithuanian")) {
-                    regionTranslated = "lt-LT";
-                } else if (languageTranslated.equals("Macedonian")) {
-                    regionTranslated = "mk-MK";
-                } else if (languageTranslated.equals("Malay")) {
-                    regionTranslated = "ms-MY";
-                } else if (languageTranslated.equals("Marathi")) {
-                    regionTranslated = "mr-IN";
-                } else if (languageTranslated.equals("Maori")) {
-                    regionTranslated = "mi-NZ";
-                } else if (languageTranslated.equals("Nepali")) {
-                    regionTranslated = "ne-NP";
-                } else if (languageTranslated.equals("Norwegian")) {
-                    regionTranslated = "no-NO";
-                } else if (languageTranslated.equals("Persian")) {
-                    regionTranslated = "fa-IR";
-                } else if (languageTranslated.equals("Polish")) {
-                    regionTranslated = "pl-PL";
-                } else if (languageTranslated.equals("Portuguese")) {
-                    regionTranslated = "pt-PT";
-                } else if (languageTranslated.equals("Romanian")) {
-                    regionTranslated = "ro-RO";
-                } else if (languageTranslated.equals("Russian")) {
-                    regionTranslated = "ru-RU";
-                } else if (languageTranslated.equals("Serbian")) {
-                    regionTranslated = "sr-RS";
-                } else if (languageTranslated.equals("Slovak")) {
-                    regionTranslated = "sk-SK";
-                } else if (languageTranslated.equals("Slovenian")) {
-                    regionTranslated = "sl-SI";
-                } else if (languageTranslated.equals("Spanish")) {
-                    regionTranslated = "es-ES";
-                } else if (languageTranslated.equals("Swahili")) {
-                    regionTranslated = "sw-TZ";
-                } else if (languageTranslated.equals("Swedish")) {
-                    regionTranslated = "sv-SE";
-                } else if (languageTranslated.equals("Tagalog")) {
-                    regionTranslated = "tl-PH";
-                } else if (languageTranslated.equals("Tamil")) {
-                    regionTranslated = "ta-IN";
-                } else if (languageTranslated.equals("Thai")) {
-                    regionTranslated = "th-TH";
-                } else if (languageTranslated.equals("Turkish")) {
-                    regionTranslated = "tr-TR";
-                } else if (languageTranslated.equals("Ukrainian")) {
-                    regionTranslated = "uk-UA";
-                } else if (languageTranslated.equals("Urdu")) {
-                    regionTranslated = "ur-PK";
-                } else if (languageTranslated.equals("Vietnamese")) {
-                    regionTranslated = "vi-VN";
-                } else if (languageTranslated.equals("Welsh")) {
-                    regionTranslated = "cy-GB";
+                if (longLanguage1.equals("Afrikaans")) {
+                    languageRegion1 = "af-ZA";
+                    language1 = "af";
+                    region1 = "ZA";
+                } else if (longLanguage1.equals("Arabic")) {
+                    languageRegion1 = "ar-SA";
+                    language1 = "ar";
+                    region1 = "SA";
+                } else if (longLanguage1.equals("Armenian")) {
+                    languageRegion1 = "hy-AM";
+                    language1 = "hy";
+                    region1 = "AM";
+                } else if (longLanguage1.equals("Azerbaijani")) {
+                    languageRegion1 = "az-AZ";
+                    language1 = "az";
+                    region1 = "AZ";
+                } else if (longLanguage1.equals("Belarusian")) {
+                    languageRegion1 = "be-BY";
+                    language1 = "be";
+                    region1 = "BY";
+                } else if (longLanguage1.equals("Bosnian")) {
+                    languageRegion1 = "bs-BA";
+                    language1 = "bs";
+                    region1 = "BA";
+                } else if (longLanguage1.equals("Bulgarian")) {
+                    languageRegion1 = "bg-BG";
+                    language1 = "bg";
+                    region1 = "BG";
+                } else if (longLanguage1.equals("Catalan")) {
+                    languageRegion1 = "ca-ES";
+                    language1 = "ca";
+                    region1 = "ES";
+                } else if (longLanguage1.equals("Chinese")) {
+                    languageRegion1 = "zh-CN";
+                    language1 = "zh";
+                    region1 = "CN";
+                } else if (longLanguage1.equals("Croatian")) {
+                    languageRegion1 = "hr-HR";
+                    language1 = "hr";
+                    region1 = "HR";
+                } else if (longLanguage1.equals("Czech")) {
+                    languageRegion1 = "cs-CZ";
+                    language1 = "cs";
+                    region1 = "CZ";
+                } else if (longLanguage1.equals("Danish")) {
+                    languageRegion1 = "da-DK";
+                    language1 = "da";
+                    region1 = "DK";
+                } else if (longLanguage1.equals("Dutch")) {
+                    languageRegion1 = "nl-NL";
+                    language1 = "nl";
+                    region1 = "NL";
+                } else if (longLanguage1.equals("English")) {
+                    languageRegion1 = "en-US";
+                    language1 = "en";
+                    region1 = "US";
+                } else if (longLanguage1.equals("Estonian")) {
+                    languageRegion1 = "et-EE";
+                    language1 = "et";
+                    region1 = "EE";
+                } else if (longLanguage1.equals("Finnish")) {
+                    languageRegion1 = "fi-FI";
+                    language1 = "fi";
+                    region1 = "FI";
+                } else if (longLanguage1.equals("French")) {
+                    languageRegion1 = "fr-FR";
+                    language1 = "fr";
+                    region1 = "FR";
+                } else if (longLanguage1.equals("Galician")) {
+                    languageRegion1 = "gl-ES";
+                    language1 = "gl";
+                    region1 = "ES";
+                } else if (longLanguage1.equals("German")) {
+                    languageRegion1 = "de-DE";
+                    language1 = "de";
+                    region1 = "DE";
+                } else if (longLanguage1.equals("Greek")) {
+                    languageRegion1 = "el-GR";
+                    language1 = "el";
+                    region1 = "GR";
+                } else if (longLanguage1.equals("Hebrew")) {
+                    languageRegion1 = "he-IL";
+                    language1 = "he";
+                    region1 = "IL";
+                } else if (longLanguage1.equals("Hindi")) {
+                    languageRegion1 = "hi-IN";
+                    language1 = "hi";
+                    region1 = "IN";
+                } else if (longLanguage1.equals("Hungarian")) {
+                    languageRegion1 = "hu-HU";
+                    language1 = "hu";
+                    region1 = "HU";
+                } else if (longLanguage1.equals("Icelandic")) {
+                    languageRegion1 = "is-IS";
+                    language1 = "is";
+                    region1 = "IS";
+                } else if (longLanguage1.equals("Indonesian")) {
+                    languageRegion1 = "id-ID";
+                    language1 = "id";
+                    region1 = "ID";
+                } else if (longLanguage1.equals("Italian")) {
+                    languageRegion1 = "it-IT";
+                    language1 = "it";
+                    region1 = "IT";
+                } else if (longLanguage1.equals("Japanese")) {
+                    languageRegion1 = "ja-JP";
+                    language1 = "ja";
+                    region1 = "JP";
+                } else if (longLanguage1.equals("Kannada")) {
+                    languageRegion1 = "kn-IN";
+                    language1 = "kn";
+                    region1 = "IN";
+                } else if (longLanguage1.equals("Kazakh")) {
+                    languageRegion1 = "kk-KZ";
+                    language1 = "kk";
+                    region1 = "KZ";
+                } else if (longLanguage1.equals("Korean")) {
+                    languageRegion1 = "ko-KR";
+                    language1 = "ko";
+                    region1 = "KR";
+                } else if (longLanguage1.equals("Latvian")) {
+                    languageRegion1 = "lv-LV";
+                    language1 = "lv";
+                    region1 = "LV";
+                } else if (longLanguage1.equals("Lithuanian")) {
+                    languageRegion1 = "lt-LT";
+                    language1 = "lt";
+                    region1 = "LT";
+                } else if (longLanguage1.equals("Macedonian")) {
+                    languageRegion1 = "mk-MK";
+                    language1 = "mk";
+                    region1 = "MK";
+                } else if (longLanguage1.equals("Malay")) {
+                    languageRegion1 = "ms-MY";
+                    language1 = "ms";
+                    region1 = "MY";
+                } else if (longLanguage1.equals("Marathi")) {
+                    languageRegion1 = "mr-IN";
+                    language1 = "mr";
+                    region1 = "IN";
+                } else if (longLanguage1.equals("Maori")) {
+                    languageRegion1 = "mi-NZ";
+                    language1 = "mi";
+                    region1 = "NZ";
+                } else if (longLanguage1.equals("Nepali")) {
+                    languageRegion1 = "ne-NP";
+                    language1 = "ne";
+                    region1 = "NP";
+                } else if (longLanguage1.equals("Norwegian")) {
+                    languageRegion1 = "no-NO";
+                    language1 = "no";
+                    region1 = "NO";
+                } else if (longLanguage1.equals("Persian")) {
+                    languageRegion1 = "fa-IR";
+                    language1 = "fa";
+                    region1 = "IR";
+                } else if (longLanguage1.equals("Polish")) {
+                    languageRegion1 = "pl-PL";
+                    language1 = "pl";
+                    region1 = "PL";
+                } else if (longLanguage1.equals("Portuguese")) {
+                    languageRegion1 = "pt-PT";
+                    language1 = "pt";
+                    region1 = "PT";
+                } else if (longLanguage1.equals("Romanian")) {
+                    languageRegion1 = "ro-RO";
+                    language1 = "ro";
+                    region1 = "RO";
+                } else if (longLanguage1.equals("Russian")) {
+                    languageRegion1 = "ru-RU";
+                    language1 = "ru";
+                    region1 = "RU";
+                } else if (longLanguage1.equals("Serbian")) {
+                    languageRegion1 = "sr-RS";
+                    language1 = "sr";
+                    region1 = "RS";
+                } else if (longLanguage1.equals("Slovak")) {
+                    languageRegion1 = "sk-SK";
+                    language1 = "sk";
+                    region1 = "SK";
+                } else if (longLanguage1.equals("Slovenian")) {
+                    languageRegion1 = "sl-SI";
+                    language1 = "sl";
+                    region1 = "SI";
+                } else if (longLanguage1.equals("Spanish")) {
+                    languageRegion1 = "es-ES";
+                    language1 = "es";
+                    region1 = "ES";
+                } else if (longLanguage1.equals("Swahili")) {
+                    languageRegion1 = "sw-TZ";
+                    language1 = "sw";
+                    region1 = "TZ";
+                } else if (longLanguage1.equals("Swedish")) {
+                    languageRegion1 = "sv-SE";
+                    language1 = "sv";
+                    region1 = "SE";
+                } else if (longLanguage1.equals("Tagalog")) {
+                    languageRegion1 = "tl-PH";
+                    language1 = "tl";
+                    region1 = "PH";
+                } else if (longLanguage1.equals("Tamil")) {
+                    languageRegion1 = "ta-IN";
+                    language1 = "ta";
+                    region1 = "IN";
+                } else if (longLanguage1.equals("Thai")) {
+                    languageRegion1 = "th-TH";
+                    language1 = "th";
+                    region1 = "TH";
+                } else if (longLanguage1.equals("Turkish")) {
+                    languageRegion1 = "tr-TR";
+                    language1 = "tr";
+                    region1 = "TR";
+                } else if (longLanguage1.equals("Ukrainian")) {
+                    languageRegion1 = "uk-UA";
+                    language1 = "uk";
+                    region1 = "UA";
+                } else if (longLanguage1.equals("Urdu")) {
+                    languageRegion1 = "ur-PK";
+                    language1 = "ur";
+                    region1 = "PK";
+                } else if (longLanguage1.equals("Vietnamese")) {
+                    languageRegion1 = "vi-VN";
+                    language1 = "vi";
+                    region1 = "VN";
+                } else if (longLanguage1.equals("Welsh")) {
+                    languageRegion1 = "cy-GB";
+                    language1 = "cy";
+                    region1 = "GB";
                 }
 
                 // You can use the selectedLanguage variable here or pass it to another method
                 // For example, log the selected language
-                Log.d("SelectedLanguage", "Selected Language: " + languageTranslated);
+                Log.d("SelectedLanguage", "Selected Language: " + longLanguage1);
             }
 
             @Override
@@ -226,178 +348,235 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // Get the selected language
-                longLanguageToTranslate = languages[position];
-                if (longLanguageToTranslate.equals("Afrikaans")) {
-                    regionToTranslate = "ZA";
-                    languageToTranslate = "af";
-                } else if (longLanguageToTranslate.equals("Arabic")) {
-                    regionToTranslate = "SA";
-                    languageToTranslate = "ar";
-                } else if (longLanguageToTranslate.equals("Armenian")) {
-                    regionToTranslate = "AM";
-                    languageToTranslate = "hy";
-                } else if (longLanguageToTranslate.equals("Azerbaijani")) {
-                    regionToTranslate = "AZ";
-                    languageToTranslate = "az";
-                } else if (longLanguageToTranslate.equals("Belarusian")) {
-                    regionToTranslate = "BY";
-                    languageToTranslate = "be";
-                } else if (longLanguageToTranslate.equals("Bosnian")) {
-                    regionToTranslate = "BA";
-                    languageToTranslate = "bs";
-                } else if (longLanguageToTranslate.equals("Bulgarian")) {
-                    regionToTranslate = "BG";
-                    languageToTranslate = "bg";
-                } else if (longLanguageToTranslate.equals("Catalan")) {
-                    regionToTranslate = "ES";
-                    languageToTranslate = "ca";
-                } else if (longLanguageToTranslate.equals("Chinese")) {
-                    regionToTranslate = "CN";
-                    languageToTranslate = "zh";
-                } else if (longLanguageToTranslate.equals("Croatian")) {
-                    regionToTranslate = "HR";
-                    languageToTranslate = "hr";
-                } else if (longLanguageToTranslate.equals("Czech")) {
-                    regionToTranslate = "CZ";
-                    languageToTranslate = "cs";
-                } else if (longLanguageToTranslate.equals("Danish")) {
-                    regionToTranslate = "DK";
-                    languageToTranslate = "da";
-                } else if (longLanguageToTranslate.equals("Dutch")) {
-                    regionToTranslate = "NL";
-                    languageToTranslate = "nl";
-                } else if (longLanguageToTranslate.equals("English")) {
-                    regionToTranslate = "US";
-                    languageToTranslate = "en";
-                } else if (longLanguageToTranslate.equals("Estonian")) {
-                    regionToTranslate = "EE";
-                    languageToTranslate = "et";
-                } else if (longLanguageToTranslate.equals("Finnish")) {
-                    regionToTranslate = "FI";
-                    languageToTranslate = "fi";
-                } else if (longLanguageToTranslate.equals("French")) {
-                    regionToTranslate = "FR";
-                    languageToTranslate = "fr";
-                } else if (longLanguageToTranslate.equals("Galician")) {
-                    regionToTranslate = "ES";
-                    languageToTranslate = "gl";
-                } else if (longLanguageToTranslate.equals("German")) {
-                    regionToTranslate = "DE";
-                    languageToTranslate = "de";
-                } else if (longLanguageToTranslate.equals("Greek")) {
-                    regionToTranslate = "GR";
-                    languageToTranslate = "el";
-                } else if (longLanguageToTranslate.equals("Hebrew")) {
-                    regionToTranslate = "IL";
-                    languageToTranslate = "he";
-                } else if (longLanguageToTranslate.equals("Hindi")) {
-                    regionToTranslate = "IN";
-                    languageToTranslate = "hi";
-                } else if (longLanguageToTranslate.equals("Hungarian")) {
-                    regionToTranslate = "HU";
-                    languageToTranslate = "hu";
-                } else if (longLanguageToTranslate.equals("Icelandic")) {
-                    regionToTranslate = "IS";
-                    languageToTranslate = "is";
-                } else if (longLanguageToTranslate.equals("Indonesian")) {
-                    regionToTranslate = "ID";
-                    languageToTranslate = "id";
-                } else if (longLanguageToTranslate.equals("Italian")) {
-                    regionToTranslate = "IT";
-                    languageToTranslate = "it";
-                } else if (longLanguageToTranslate.equals("Japanese")) {
-                    regionToTranslate = "JP";
-                    languageToTranslate = "ja";
-                } else if (longLanguageToTranslate.equals("Kannada")) {
-                    regionToTranslate = "IN";
-                    languageToTranslate = "kn";
-                } else if (longLanguageToTranslate.equals("Kazakh")) {
-                    regionToTranslate = "KZ";
-                    languageToTranslate = "kk";
-                } else if (longLanguageToTranslate.equals("Korean")) {
-                    regionToTranslate = "KR";
-                    languageToTranslate = "ko";
-                } else if (longLanguageToTranslate.equals("Latvian")) {
-                    regionToTranslate = "LV";
-                    languageToTranslate = "lv";
-                } else if (longLanguageToTranslate.equals("Lithuanian")) {
-                    regionToTranslate = "LT";
-                    languageToTranslate = "lt";
-                } else if (longLanguageToTranslate.equals("Macedonian")) {
-                    regionToTranslate = "MK";
-                    languageToTranslate = "mk";
-                } else if (longLanguageToTranslate.equals("Malay")) {
-                    regionToTranslate = "MY";
-                    languageToTranslate = "ms";
-                } else if (longLanguageToTranslate.equals("Marathi")) {
-                    regionToTranslate = "IN";
-                    languageToTranslate = "mr";
-                } else if (longLanguageToTranslate.equals("Maori")) {
-                    regionToTranslate = "NZ";
-                    languageToTranslate = "mi";
-                } else if (longLanguageToTranslate.equals("Nepali")) {
-                    regionToTranslate = "NP";
-                    languageToTranslate = "ne";
-                } else if (longLanguageToTranslate.equals("Norwegian")) {
-                    regionToTranslate = "NO";
-                    languageToTranslate = "no";
-                } else if (longLanguageToTranslate.equals("Persian")) {
-                    regionToTranslate = "IR";
-                    languageToTranslate = "fa";
-                } else if (longLanguageToTranslate.equals("Polish")) {
-                    regionToTranslate = "PL";
-                    languageToTranslate = "pl";
-                } else if (longLanguageToTranslate.equals("Portuguese")) {
-                    regionToTranslate = "PT";
-                    languageToTranslate = "pt";
-                } else if (longLanguageToTranslate.equals("Romanian")) {
-                    regionToTranslate = "RO";
-                    languageToTranslate = "ro";
-                } else if (longLanguageToTranslate.equals("Russian")) {
-                    regionToTranslate = "RU";
-                    languageToTranslate = "ru";
-                } else if (longLanguageToTranslate.equals("Serbian")) {
-                    regionToTranslate = "RS";
-                    languageToTranslate = "sr";
-                } else if (longLanguageToTranslate.equals("Slovak")) {
-                    regionToTranslate = "SK";
-                    languageToTranslate = "sk";
-                } else if (longLanguageToTranslate.equals("Slovenian")) {
-                    regionToTranslate = "SI";
-                    languageToTranslate = "sl";
-                } else if (longLanguageToTranslate.equals("Spanish")) {
-                    regionToTranslate = "ES";
-                    languageToTranslate = "es";
-                } else if (longLanguageToTranslate.equals("Swahili")) {
-                    regionToTranslate = "TZ";
-                    languageToTranslate = "sw";
-                } else if (longLanguageToTranslate.equals("Swedish")) {
-                    regionToTranslate = "SE";
-                    languageToTranslate = "sv";
-                } else if (longLanguageToTranslate.equals("Tagalog")) {
-                    regionToTranslate = "PH";
-                    languageToTranslate = "tl";
-                } else if (longLanguageToTranslate.equals("Tamil")) {
-                    regionToTranslate = "IN";
-                    languageToTranslate = "ta";
-                } else if (longLanguageToTranslate.equals("Thai")) {
-                    regionToTranslate = "TH";
-                    languageToTranslate = "th";
-                } else if (longLanguageToTranslate.equals("Turkish")) {
-                    regionToTranslate = "TR";
-                    languageToTranslate = "tr";
-                } else if (longLanguageToTranslate.equals("Ukrainian")) {
-                    regionToTranslate = "UA";
-                    languageToTranslate = "uk";
-                } else if (longLanguageToTranslate.equals("Urdu")) {
-                    regionToTranslate = "PK";
-                    languageToTranslate = "ur";
-                } else if (longLanguageToTranslate.equals("Vietnamese")) {
-                    regionToTranslate = "VN";
-                    languageToTranslate = "vi";
-                } else if (longLanguageToTranslate.equals("Welsh")) {
-                    regionToTranslate = "GB";
-                    languageToTranslate = "cy";
+                longLanguage2 = languages[position];
+                if (longLanguage2.equals("Afrikaans")) {
+                    languageRegion2 = "af-ZA";
+                    language2 = "af";
+                    region2 = "ZA";
+                } else if (longLanguage2.equals("Arabic")) {
+                    languageRegion2 = "ar-SA";
+                    language2 = "ar";
+                    region2 = "SA";
+                } else if (longLanguage2.equals("Armenian")) {
+                    languageRegion2 = "hy-AM";
+                    language2 = "hy";
+                    region2 = "AM";
+                } else if (longLanguage2.equals("Azerbaijani")) {
+                    languageRegion2 = "az-AZ";
+                    language2 = "az";
+                    region2 = "AZ";
+                } else if (longLanguage2.equals("Belarusian")) {
+                    languageRegion2 = "be-BY";
+                    language2 = "be";
+                    region2 = "BY";
+                } else if (longLanguage2.equals("Bosnian")) {
+                    languageRegion2 = "bs-BA";
+                    language2 = "bs";
+                    region2 = "BA";
+                } else if (longLanguage2.equals("Bulgarian")) {
+                    languageRegion2 = "bg-BG";
+                    language2 = "bg";
+                    region2 = "BG";
+                } else if (longLanguage2.equals("Catalan")) {
+                    languageRegion2 = "ca-ES";
+                    language2 = "ca";
+                    region2 = "ES";
+                } else if (longLanguage2.equals("Chinese")) {
+                    languageRegion2 = "zh-CN";
+                    language2 = "zh";
+                    region2 = "CN";
+                } else if (longLanguage2.equals("Croatian")) {
+                    languageRegion2 = "hr-HR";
+                    language2 = "hr";
+                    region2 = "HR";
+                } else if (longLanguage2.equals("Czech")) {
+                    languageRegion2 = "cs-CZ";
+                    language2 = "cs";
+                    region2 = "CZ";
+                } else if (longLanguage2.equals("Danish")) {
+                    languageRegion2 = "da-DK";
+                    language2 = "da";
+                    region2 = "DK";
+                } else if (longLanguage2.equals("Dutch")) {
+                    languageRegion2 = "nl-NL";
+                    language2 = "nl";
+                    region2 = "NL";
+                } else if (longLanguage2.equals("English")) {
+                    languageRegion2 = "en-US";
+                    language2 = "en";
+                    region2 = "US";
+                } else if (longLanguage2.equals("Estonian")) {
+                    languageRegion2 = "et-EE";
+                    language2 = "et";
+                    region2 = "EE";
+                } else if (longLanguage2.equals("Finnish")) {
+                    languageRegion2 = "fi-FI";
+                    language2 = "fi";
+                    region2 = "FI";
+                } else if (longLanguage2.equals("French")) {
+                    languageRegion2 = "fr-FR";
+                    language2 = "fr";
+                    region2 = "FR";
+                } else if (longLanguage2.equals("Galician")) {
+                    languageRegion2 = "gl-ES";
+                    language2 = "gl";
+                    region2 = "ES";
+                } else if (longLanguage2.equals("German")) {
+                    languageRegion2 = "de-DE";
+                    language2 = "de";
+                    region2 = "DE";
+                } else if (longLanguage2.equals("Greek")) {
+                    languageRegion2 = "el-GR";
+                    language2 = "el";
+                    region2 = "GR";
+                } else if (longLanguage2.equals("Hebrew")) {
+                    languageRegion2 = "he-IL";
+                    language2 = "he";
+                    region2 = "IL";
+                } else if (longLanguage2.equals("Hindi")) {
+                    languageRegion2 = "hi-IN";
+                    language2 = "hi";
+                    region2 = "IN";
+                } else if (longLanguage2.equals("Hungarian")) {
+                    languageRegion2 = "hu-HU";
+                    language2 = "hu";
+                    region2 = "HU";
+                } else if (longLanguage2.equals("Icelandic")) {
+                    languageRegion2 = "is-IS";
+                    language2 = "is";
+                    region2 = "IS";
+                } else if (longLanguage2.equals("Indonesian")) {
+                    languageRegion2 = "id-ID";
+                    language2 = "id";
+                    region2 = "ID";
+                } else if (longLanguage2.equals("Italian")) {
+                    languageRegion2 = "it-IT";
+                    language2 = "it";
+                    region2 = "IT";
+                } else if (longLanguage2.equals("Japanese")) {
+                    languageRegion2 = "ja-JP";
+                    language2 = "ja";
+                    region2 = "JP";
+                } else if (longLanguage2.equals("Kannada")) {
+                    languageRegion2 = "kn-IN";
+                    language2 = "kn";
+                    region2 = "IN";
+                } else if (longLanguage2.equals("Kazakh")) {
+                    languageRegion2 = "kk-KZ";
+                    language2 = "kk";
+                    region2 = "KZ";
+                } else if (longLanguage2.equals("Korean")) {
+                    languageRegion2 = "ko-KR";
+                    language2 = "ko";
+                    region2 = "KR";
+                } else if (longLanguage2.equals("Latvian")) {
+                    languageRegion2 = "lv-LV";
+                    language2 = "lv";
+                    region2 = "LV";
+                } else if (longLanguage2.equals("Lithuanian")) {
+                    languageRegion2 = "lt-LT";
+                    language2 = "lt";
+                    region2 = "LT";
+                } else if (longLanguage2.equals("Macedonian")) {
+                    languageRegion2 = "mk-MK";
+                    language2 = "mk";
+                    region2 = "MK";
+                } else if (longLanguage2.equals("Malay")) {
+                    languageRegion2 = "ms-MY";
+                    language2 = "ms";
+                    region2 = "MY";
+                } else if (longLanguage2.equals("Marathi")) {
+                    languageRegion2 = "mr-IN";
+                    language2 = "mr";
+                    region2 = "IN";
+                } else if (longLanguage2.equals("Maori")) {
+                    languageRegion2 = "mi-NZ";
+                    language2 = "mi";
+                    region2 = "NZ";
+                } else if (longLanguage2.equals("Nepali")) {
+                    languageRegion2 = "ne-NP";
+                    language2 = "ne";
+                    region2 = "NP";
+                } else if (longLanguage2.equals("Norwegian")) {
+                    languageRegion2 = "no-NO";
+                    language2 = "no";
+                    region2 = "NO";
+                } else if (longLanguage2.equals("Persian")) {
+                    languageRegion2 = "fa-IR";
+                    language2 = "fa";
+                    region2 = "IR";
+                } else if (longLanguage2.equals("Polish")) {
+                    languageRegion2 = "pl-PL";
+                    language2 = "pl";
+                    region2 = "PL";
+                } else if (longLanguage2.equals("Portuguese")) {
+                    languageRegion2 = "pt-PT";
+                    language2 = "pt";
+                    region2 = "PT";
+                } else if (longLanguage2.equals("Romanian")) {
+                    languageRegion2 = "ro-RO";
+                    language2 = "ro";
+                    region2 = "RO";
+                } else if (longLanguage2.equals("Russian")) {
+                    languageRegion2 = "ru-RU";
+                    language2 = "ru";
+                    region2 = "RU";
+                } else if (longLanguage2.equals("Serbian")) {
+                    languageRegion2 = "sr-RS";
+                    language2 = "sr";
+                    region2 = "RS";
+                } else if (longLanguage2.equals("Slovak")) {
+                    languageRegion2 = "sk-SK";
+                    language2 = "sk";
+                    region2 = "SK";
+                } else if (longLanguage2.equals("Slovenian")) {
+                    languageRegion2 = "sl-SI";
+                    language2 = "sl";
+                    region2 = "SI";
+                } else if (longLanguage2.equals("Spanish")) {
+                    languageRegion2 = "es-ES";
+                    language2 = "es";
+                    region2 = "ES";
+                } else if (longLanguage2.equals("Swahili")) {
+                    languageRegion2 = "sw-TZ";
+                    language2 = "sw";
+                    region2 = "TZ";
+                } else if (longLanguage2.equals("Swedish")) {
+                    languageRegion2 = "sv-SE";
+                    language2 = "sv";
+                    region2 = "SE";
+                } else if (longLanguage2.equals("Tagalog")) {
+                    languageRegion2 = "tl-PH";
+                    language2 = "tl";
+                    region2 = "PH";
+                } else if (longLanguage2.equals("Tamil")) {
+                    languageRegion2 = "ta-IN";
+                    language2 = "ta";
+                    region2 = "IN";
+                } else if (longLanguage2.equals("Thai")) {
+                    languageRegion2 = "th-TH";
+                    language2 = "th";
+                    region2 = "TH";
+                } else if (longLanguage2.equals("Turkish")) {
+                    languageRegion2 = "tr-TR";
+                    language2 = "tr";
+                    region2 = "TR";
+                } else if (longLanguage2.equals("Ukrainian")) {
+                    languageRegion2 = "uk-UA";
+                    language2 = "uk";
+                    region2 = "UA";
+                } else if (longLanguage2.equals("Urdu")) {
+                    languageRegion2 = "ur-PK";
+                    language2 = "ur";
+                    region2 = "PK";
+                } else if (longLanguage2.equals("Vietnamese")) {
+                    languageRegion2 = "vi-VN";
+                    language2 = "vi";
+                    region2 = "VN";
+                } else if (longLanguage2.equals("Welsh")) {
+                    languageRegion2 = "cy-GB";
+                    language2 = "cy";
+                    region2 = "GB";
                 }
             }
 
@@ -408,7 +587,6 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
         });
 
         gpt3Api = new Gpt3Api(this);
-        editTextQuestion = findViewById(R.id.editTextQuestion);
         chatLayout = findViewById(R.id.layoutInput);
         progressBar = findViewById(R.id.progressBar);
 
@@ -416,44 +594,86 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
         textToSpeech = new TextToSpeech(this, this);
         isVoiceEnabled = getSharedPreferences("MICHATGPT", MODE_PRIVATE).getBoolean("CHECKRESPVOICE", true);
 
-        Button buttonAsk = findViewById(R.id.buttonAsk);
-        buttonAsk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String prompt = editTextQuestion.getText().toString();
-                editTextQuestion.setText("");
-                callChatGpt("Translate the following " + languageTranslated + "text to "+ longLanguageToTranslate +": " + prompt);
-            }
-        });
-
         Button buttonSpeech = findViewById(R.id.buttonSpeech);
+        Button buttonClear = findViewById(R.id.buttonClear);
+        ImageView imageView = findViewById(R.id.imageView);
+        final float[] currentRotation = {imageView.getRotation()};
         buttonSpeech.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                float newRotation = currentRotation[0] + 180;
+                if(isLeftSpeaking)
+                    speechRecognizer.start(languageRegion1);
+                else
+                    speechRecognizer.start(languageRegion2);
 
-                // Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                // intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, regionTranslated);
-                // intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                speechRecognizer.start(regionTranslated);
-                //voiceRecognitionLauncher.launch(intent);
+                RotateAnimation rotate = new RotateAnimation(currentRotation[0], newRotation,
+                        Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                rotate.setDuration(500); // Duration of the animation in milliseconds
+                rotate.setFillAfter(true); // Keeps the rotated state after animation
 
+                currentRotation[0] = newRotation % 360;
 
-                // Create a new RecognizerIntent with the specified language
-                //Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                //intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, regionTranslated);
-                //speechRecognizer.startListening();
+                imageView.startAnimation(rotate);
+
+                isLeftSpeaking = !isLeftSpeaking;
+
             }
         });
 
-        CheckBox checkboxVoiceResult = findViewById(R.id.checkVoiceResut);
-        checkboxVoiceResult.setChecked(isVoiceEnabled);
-        checkboxVoiceResult.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        buttonClear.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isVoiceEnabled = isChecked;
-                getSharedPreferences("MICHATGPT", MODE_PRIVATE).edit().putBoolean("CHECKRESPVOICE", isChecked).apply();
+            public void onClick(View v) {
+
+                // Reset conversation if the arrow points to the left
+                if (currentRotation[0] <= 180) {
+                    RotateAnimation rotate = new RotateAnimation(currentRotation[0], 0,
+                            Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                    rotate.setDuration(500); // Duration of the animation in milliseconds
+                    rotate.setFillAfter(true); // Keeps the rotated state after animation
+
+                    currentRotation[0] = 0;
+
+                    imageView.startAnimation(rotate);
+
+                    isLeftSpeaking = true;
+                }
+                // Remove all text from the chat
+                chatLayout.removeAllViews();
             }
         });
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                float newRotation = currentRotation[0] + 180;
+
+                RotateAnimation rotate = new RotateAnimation(currentRotation[0], newRotation,
+                        Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                rotate.setDuration(500); // Duration of the animation in milliseconds
+                rotate.setFillAfter(true); // Keeps the rotated state after animation
+
+                currentRotation[0] = newRotation % 360;
+
+                imageView.startAnimation(rotate);
+
+                isLeftSpeaking = !isLeftSpeaking;
+
+                // Set the final rotation after the animation completes
+                rotate.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {}
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+            }
+        });
+
     }
 
     private void addChatMessage(String message, String type) {
@@ -463,23 +683,33 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
         else if (message.startsWith("\n")) {
             message = message.replaceFirst("\n", "");
         }
-        TextView textView = new TextView(this);
-        textView.setText(message);
         if (MESSAGE_TYPE_RESPONSE.equals(type)){
+            TextView textView = new TextView(this);
+            textView.setText(message);
             textView.setTypeface(null, Typeface.BOLD_ITALIC);
-        }
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(30, 5, 30, 5);
-        textView.setLayoutParams(params);
-        chatLayout.addView(textView);
-        if (MESSAGE_TYPE_RESPONSE.equals(type)){
-            callTextToSpeech(message, new Locale(regionToTranslate, languageToTranslate));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(30, 5, 30, 10);
+
+            if (!isLeftSpeaking) {
+                textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+                textView.setLayoutParams(params);
+                chatLayout.addView(textView);
+                callTextToSpeech(message, new Locale(languageRegion2, language2));
+
+            } else {
+                textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
+                textView.setLayoutParams(params);
+                chatLayout.addView(textView);
+                callTextToSpeech(message, new Locale(languageRegion1, language1));
+            }
+
+
         }
     }
 
     private void callChatGpt(String prompt){
-        addChatMessage(prompt, MESSAGE_TYPE_REQUEST);
+        addChatMessage("", MESSAGE_TYPE_REQUEST);
         progressBar.setVisibility(View.VISIBLE);
         gpt3Api.generateText(prompt,
                 new Response.Listener<String>() {
@@ -506,16 +736,30 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
 
     @Override
     public void onSpeechRecognized(String text) {
-        callChatGpt("Translate the following " + languageTranslated + " text to " + longLanguageToTranslate + ": " + text);
+        if (!isLeftSpeaking)
+            callChatGpt("Translate the following " + longLanguage1 + " text to " + longLanguage2 + ": " + text);
+        else
+            callChatGpt("Translate the following " + longLanguage2 + " text to " + longLanguage1 + ": " + text);
     }
 
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
-            Locale languageLocale = new Locale(languageToTranslate, regionToTranslate);
-            int result = textToSpeech.setLanguage(languageLocale);
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e("TextToSpeech", "Lenguaje no soportado");
+            int result;
+            Locale languageLocale;
+            if(isLeftSpeaking) {
+                languageLocale = new Locale(language2, region2);
+                result = textToSpeech.setLanguage(languageLocale);
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e("TextToSpeech", "Lenguaje no soportado");
+                }
+            }
+            else {
+                languageLocale = new Locale(language1, region1);
+                result = textToSpeech.setLanguage(languageLocale);
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e("TextToSpeech", "Lenguaje no soportado");
+                }
             }
         } else {
             Log.e("TextToSpeech", "Inicialización fallida");
@@ -523,14 +767,12 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
     }
 
     private void callTextToSpeech(String text, Locale languageLocale) {
-        if (isVoiceEnabled) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                textToSpeech.setLanguage(languageLocale);
-                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
-            } else {
-                textToSpeech.setLanguage(languageLocale);
-                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            textToSpeech.setLanguage(languageLocale);
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        } else {
+            textToSpeech.setLanguage(languageLocale);
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
     }
 
