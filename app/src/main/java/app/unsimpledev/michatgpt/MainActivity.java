@@ -49,11 +49,11 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
     private String longLanguage1 = "English";
     private String languageRegion1 = "en-US";
     private String language1 = "en";
-    private String region1 = "US";
+    private String region1 = "USA";
     private String longLanguage2 = "Spanish";
-    private String languageRegion2 = "es-ES";
+    private String languageRegion2 = "es-ESP";
     private String language2 = "es";
-    private String region2 = "ES";
+    private String region2 = "ESP";
     private boolean isLeftSpeaking = true; // Initial alignment
     private boolean translateToRightLanguage = true;
 
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
                 } else if (longLanguage1.equals("English")) {
                     languageRegion1 = "en-US";
                     language1 = "en";
-                    region1 = "US";
+                    region1 = "USA";
                 } else if (longLanguage1.equals("Estonian")) {
                     languageRegion1 = "et-EE";
                     language1 = "et";
@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
                 } else if (longLanguage1.equals("Spanish")) {
                     languageRegion1 = "es-ES";
                     language1 = "es";
-                    region1 = "ES";
+                    region1 = "ESP";
                 } else if (longLanguage1.equals("Swahili")) {
                     languageRegion1 = "sw-TZ";
                     language1 = "sw";
@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
                 } else if (longLanguage1.equals("Welsh")) {
                     languageRegion1 = "cy-GB";
                     language1 = "cy";
-                    region1 = "GB";
+                    region1 = "GBR";
                 }
 
                 // You can use the selectedLanguage variable here or pass it to another method
@@ -404,7 +404,7 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
                 } else if (longLanguage2.equals("English")) {
                     languageRegion2 = "en-US";
                     language2 = "en";
-                    region2 = "US";
+                    region2 = "USA";
                 } else if (longLanguage2.equals("Estonian")) {
                     languageRegion2 = "et-EE";
                     language2 = "et";
@@ -516,11 +516,11 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
                 } else if (longLanguage2.equals("Romanian")) {
                     languageRegion2 = "ro-RO";
                     language2 = "ro";
-                    region2 = "RO";
+                    region2 = "ROU";
                 } else if (longLanguage2.equals("Russian")) {
                     languageRegion2 = "ru-RU";
                     language2 = "ru";
-                    region2 = "RU";
+                    region2 = "RUS";
                 } else if (longLanguage2.equals("Serbian")) {
                     languageRegion2 = "sr-RS";
                     language2 = "sr";
@@ -616,8 +616,6 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
 
                 imageView.startAnimation(rotate);
 
-                isLeftSpeaking = !isLeftSpeaking;
-
             }
         });
 
@@ -655,9 +653,9 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
 
                 currentRotation[0] = newRotation % 360;
 
-                imageView.startAnimation(rotate);
-
                 isLeftSpeaking = !isLeftSpeaking;
+
+                imageView.startAnimation(rotate);
 
                 // Set the final rotation after the animation completes
                 rotate.setAnimationListener(new Animation.AnimationListener() {
@@ -691,25 +689,25 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.setMargins(30, 5, 30, 10);
 
-            if (!isLeftSpeaking) {
+            if (isLeftSpeaking) {
                 textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
                 textView.setLayoutParams(params);
                 chatLayout.addView(textView);
-                callTextToSpeech(message, new Locale(languageRegion2, language2));
+                callTextToSpeech(message, new Locale(language2, region2));
 
             } else {
                 textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
                 textView.setLayoutParams(params);
                 chatLayout.addView(textView);
-                callTextToSpeech(message, new Locale(languageRegion1, language1));
+                callTextToSpeech(message, new Locale(language1, region1));
             }
+
 
 
         }
     }
 
     private void callChatGpt(String prompt){
-        addChatMessage("", MESSAGE_TYPE_REQUEST);
         progressBar.setVisibility(View.VISIBLE);
         gpt3Api.generateText(prompt,
                 new Response.Listener<String>() {
@@ -736,7 +734,7 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
 
     @Override
     public void onSpeechRecognized(String text) {
-        if (!isLeftSpeaking)
+        if (isLeftSpeaking)
             callChatGpt("Translate the following " + longLanguage1 + " text to " + longLanguage2 + ": " + text);
         else
             callChatGpt("Translate the following " + longLanguage2 + " text to " + longLanguage1 + ": " + text);
@@ -774,6 +772,8 @@ public class MainActivity extends AppCompatActivity  implements SpeechRecognizer
             textToSpeech.setLanguage(languageLocale);
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
+
+        isLeftSpeaking = !isLeftSpeaking;
     }
 
     private Spinner languageSpinner;
